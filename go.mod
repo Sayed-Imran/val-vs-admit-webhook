@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/spf13/pflag v1.0.5
 	k8s.io/apiserver v0.29.3
+	k8s.io/component-base v0.29.3
 )
 
 require (
@@ -90,7 +91,6 @@ require (
 	k8s.io/api v0.29.3 // indirect
 	k8s.io/apimachinery v0.29.3 // indirect
 	k8s.io/client-go v0.29.3 // indirect
-	k8s.io/component-base v0.29.3 // indirect
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kms v0.29.3 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
