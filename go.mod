@@ -2,7 +2,10 @@ module github.com/sayed-imran/val-vs-admit-webhook
 
 go 1.20
 
-require k8s.io/apiserver v0.29.3
+require (
+	github.com/spf13/pflag v1.0.5
+	k8s.io/apiserver v0.29.3
+)
 
 require (
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
@@ -49,7 +52,6 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/spf13/cobra v1.7.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stoewer/go-strcase v1.2.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.10 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.10 // indirect
