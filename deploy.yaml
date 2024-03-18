@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vs-vald-con
+spec:
+  selector:
+    matchLabels:
+      app: vs-vald-con
+  template:
+    metadata:
+      labels:
+        app: vs-vald-con
+    spec:
+      volumes:
+      - name: serving-certs
+        secret:
+          secretName: vs-vald-con-certs
+
+      containers:
+      - name: vs-vald-con
+        image: sayedimran/vs-vald-con:v1.0.0
+        args:
+        - "--tls-cert-file=/var/run/secrets/tls/tls.crt"
+        - "--tls-private-key-file=/var/run/secrets/tls/tls.key"
+        - "--v=4"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: serving-certs
+          mountPath: /var/run/secrets/tls/
+          readOnly: true
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vs-vald-con
+spec:
+  selector:
+    app: vs-vald-con
+  ports:
+  - protocol: TCP
+    port: 443
+    targetPort: 8080
+  type: ClusterIP
