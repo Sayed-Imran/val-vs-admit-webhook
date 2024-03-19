@@ -21,13 +21,9 @@ import (
 	"k8s.io/component-base/cli/globalflag"
 )
 
-type Options struct {
-	SecureServingOptions options.SecureServingOptions
-}
+type Options struct{ SecureServingOptions options.SecureServingOptions }
 
-type Config struct {
-	SecureServingInfo *server.SecureServingInfo
-}
+type Config struct{ SecureServingInfo *server.SecureServingInfo }
 
 const (
 	vsValdCon = "vs-vald-con"
@@ -38,9 +34,7 @@ var (
 	codecs = serializer.NewCodecFactory(scheme)
 )
 
-func (o *Options) AddFlagSet(fs *pflag.FlagSet) {
-	o.SecureServingOptions.AddFlags(fs)
-}
+func (o *Options) AddFlagSet(fs *pflag.FlagSet) { o.SecureServingOptions.AddFlags(fs) }
 
 func (o *Options) ServerConfig() *Config {
 	if err := o.SecureServingOptions.MaybeDefaultWithSelfSignedCerts("0.0.0.0", nil, nil); err != nil {
@@ -53,9 +47,7 @@ func (o *Options) ServerConfig() *Config {
 }
 
 func NewDefaultOptions() *Options {
-	o := &Options{
-		SecureServingOptions: *options.NewSecureServingOptions(),
-	}
+	o := &Options{SecureServingOptions: *options.NewSecureServingOptions()}
 	o.SecureServingOptions.BindPort = 8443
 	o.SecureServingOptions.ServerCert.PairName = vsValdCon
 	return o
