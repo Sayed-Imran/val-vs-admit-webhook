@@ -12,68 +12,70 @@ import (
 )
 
 type Options struct {
-	// SecureServing is the options for the secure serving server.
 	SecureServingOptions options.SecureServingOptions
 }
 
 type Config struct {
-	// SecureServing is the config for the secure serving server.
 	SecureServingInfo *server.SecureServingInfo
-}
-
-const (
-	vsValidatorName = "vs-validator"
-)
-
-func NewDefaultOptions() *Options {
-	o := &Options{
-		SecureServingOptions: *options.NewSecureServingOptions(),
-	}
-
-	o.SecureServingOptions.BindPort = 8080
-	o.SecureServingOptions.ServerCert.PairName = vsValidatorName
-	return o
-}
-
-func (o *Options) ServerConfig() *Config {
-	err := o.SecureServingOptions.MaybeDefaultWithSelfSignedCerts("0.0.0.0", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	config := &Config{}
-	o.SecureServingOptions.ApplyTo(&config.SecureServingInfo)
-	return config
 }
 
 func (o *Options) AddFlagSet(fs *pflag.FlagSet) {
 	o.SecureServingOptions.AddFlags(fs)
 }
 
-func main() {
-	serverOptions := NewDefaultOptions()
+func (o *Options) ServerConfig() *Config {
+	if err := o.SecureServingOptions.MaybeDefaultWithSelfSignedCerts("0.0.0.0", nil, nil); err != nil {
+		panic(err)
+	}
 
-	fs := pflag.NewFlagSet(vsValidatorName, pflag.ExitOnError)
-	globalflag.AddGlobalFlags(fs, vsValidatorName)
-	serverOptions.AddFlagSet(fs)
+	c := Config{}
+	o.SecureServingOptions.ApplyTo(&c.SecureServingInfo)
+	return &c
+}
+
+const (
+	vsValdCon = "val-vald-kon"
+)
+
+func NewDefaultOptions() *Options {
+	o := &Options{
+		SecureServingOptions: *options.NewSecureServingOptions(),
+	}
+	o.SecureServingOptions.BindPort = 8443
+	o.SecureServingOptions.ServerCert.PairName = vsValdCon
+	return o
+}
+
+func main() {
+	options := NewDefaultOptions()
+
+	fs := pflag.NewFlagSet(vsValdCon, pflag.ExitOnError)
+	globalflag.AddGlobalFlags(fs, vsValdCon)
+
+	options.AddFlagSet(fs)
 
 	if err := fs.Parse(os.Args); err != nil {
 		panic(err)
 	}
 
-	c := serverOptions.ServerConfig()
+	c := options.ServerConfig()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
+	mux.Handle("/validate", http.HandlerFunc(VirtualServiceValidator))
 
-	mux.Handle("/", http.HandlerFunc(ValidatorHandler))
 	stopCh := server.SetupSignalHandler()
-
-	c.SecureServingInfo.Serve(mux, 30*time.Second, stopCh)
-
+	readyCh, stoppedCh, err := c.SecureServingInfo.Serve(mux, 30*time.Second, stopCh)
+	if err != nil {
+		panic(err)
+	} else {
+		<-readyCh
+		<-stoppedCh
+	}
 }
 
-func ValidatorHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement the validator logic
+func VirtualServiceValidator(w http.ResponseWriter, r *http.Request) {
+	
 }
