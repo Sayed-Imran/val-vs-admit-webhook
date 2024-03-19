@@ -9,10 +9,14 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
+	
 	networkingv1alpha3 "istio.io/api/networking/v1alpha3"
 	istiov1alpha3 "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	admv1beta1 "k8s.io/api/admission/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// corev1 "k8s.io/api/core/v1"
+    "k8s.io/client-go/kubernetes"
+    "k8s.io/client-go/tools/clientcmd"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apiserver/pkg/endpoints/handlers/responsewriters"
@@ -137,7 +141,22 @@ func VirtualServiceValidator(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateRoutes(rules []*networkingv1alpha3.HTTPRoute) bool {
+	for _, rule := range rules {
+		for _, ruleMatch := range rule.GetMatch() {
+			fmt.Println("Match: ", ruleMatch.GetUri().GetPrefix())
+		}
+	}
 	fmt.Println("Validating VirtualService...")
 	fmt.Println("VirtualService: ", rules)
 	return true
+}
+
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func validateRouteCrossNamespace(prefix string) {
+	
 }
